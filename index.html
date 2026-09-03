@@ -932,6 +932,8 @@
     }
 
     .project-card {
+      position: relative;
+      overflow: hidden;
       display: grid;
       grid-template-columns: minmax(220px, 0.85fr) minmax(0, 1.15fr);
       gap: 30px;
@@ -944,6 +946,17 @@
       transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
     }
 
+    .project-card::before {
+      content: '';
+      position: absolute;
+      top: 18px;
+      bottom: 18px;
+      left: 0;
+      width: 2px;
+      background: var(--red-primary);
+      box-shadow: 0 0 16px var(--red-glow);
+    }
+
     .project-card:hover {
       transform: translateY(-4px);
       border-color: var(--red-border);
@@ -951,6 +964,7 @@
     }
 
     .project-preview {
+      position: relative;
       min-height: 230px;
       display: flex;
       flex-direction: column;
@@ -960,6 +974,27 @@
       border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 10px;
       background: radial-gradient(circle at 80% 10%, rgba(255, 30, 56, 0.25), transparent 34%), #101016;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.025), inset 0 -30px 50px rgba(0, 0, 0, 0.25);
+      transition: transform 0.25s ease, border-color 0.25s ease;
+    }
+
+    .project-preview::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.07) 50%, transparent 65%);
+      transform: translateX(-120%);
+      transition: transform 0.7s ease;
+      pointer-events: none;
+    }
+
+    .project-card:hover .project-preview {
+      transform: scale(1.012);
+      border-color: rgba(255, 30, 56, 0.45);
+    }
+
+    .project-card:hover .project-preview::after {
+      transform: translateX(120%);
     }
 
     .project-preview-top,
@@ -1033,12 +1068,18 @@
     }
 
     .project-number {
+      display: inline-flex;
+      align-items: center;
       margin-bottom: 10px;
+      padding: 6px 9px;
+      border: 1px solid var(--red-border);
+      border-radius: 6px;
       color: var(--red-primary);
       font-family: 'JetBrains Mono', monospace;
       font-size: 11px;
       font-weight: 600;
       letter-spacing: 1.5px;
+      background: rgba(255, 30, 56, 0.07);
     }
 
     .project-card-title {
@@ -1047,6 +1088,7 @@
       font-family: 'Space Grotesk', sans-serif;
       font-size: clamp(28px, 3.5vw, 40px);
       line-height: 1.05;
+      text-shadow: 0 4px 18px rgba(0, 0, 0, 0.65);
     }
 
     .project-card-description {
@@ -1071,6 +1113,13 @@
       color: #dedee5;
       font-family: 'JetBrains Mono', monospace;
       font-size: 10px;
+      background: rgba(255, 255, 255, 0.035);
+      transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .project-card:hover .project-tech {
+      border-color: rgba(255, 30, 56, 0.28);
+      background: rgba(255, 30, 56, 0.07);
     }
 
     .project-card-actions {
@@ -1241,16 +1290,33 @@
 
     /* ---------------- FOOTER ---------------- */
     .site-footer {
-      padding: 30px 0 40px 0;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      position: relative;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr auto;
+      gap: 40px;
+      margin-top: 12px;
+      padding: 34px 24px 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      background: linear-gradient(135deg, rgba(14, 14, 19, 0.78), rgba(4, 4, 7, 0.5));
+      box-shadow: inset 0 1px 0 rgba(255, 30, 56, 0.09), 0 -20px 45px rgba(0, 0, 0, 0.16);
+      isolation: isolate;
+    }
+
+    .site-footer::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: 24px;
+      width: 76px;
+      height: 2px;
+      background: var(--red-primary);
+      box-shadow: 0 0 14px var(--red-glow);
     }
 
     .footer-left {
       display: flex;
-      align-items: center;
+      flex-direction: column;
+      align-items: flex-start;
       gap: 14px;
     }
 
@@ -1260,30 +1326,135 @@
     }
 
     .footer-brand-name {
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 1px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 0;
       color: #ffffff;
-      text-transform: uppercase;
     }
 
     .footer-brand-role {
-      font-size: 10px;
-      color: var(--red-primary);
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
+      margin-top: 4px;
+      color: var(--text-muted);
+      font-size: 11px;
+      letter-spacing: 0.8px;
       font-weight: 600;
     }
 
-    .footer-center {
+    .footer-tagline,
+    .footer-description {
+      color: var(--text-muted);
       font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .footer-description {
+      max-width: 330px;
       color: var(--text-dim);
     }
 
+    .footer-availability {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border: 1px solid var(--red-border);
+      border-radius: 7px;
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      background: rgba(255, 30, 56, 0.08);
+      box-shadow: 0 0 16px rgba(255, 30, 56, 0.1);
+    }
+
+    .footer-availability::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--red-primary);
+      box-shadow: 0 0 8px var(--red-primary);
+      animation: blink 1.8s infinite;
+    }
+
+    .footer-nav,
+    .footer-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .footer-column-title {
+      margin-bottom: 14px;
+      color: var(--red-primary);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .footer-nav-links {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .footer-nav-link {
+      color: var(--text-muted);
+      font-size: 12px;
+      text-decoration: none;
+      transition: color 0.2s ease, transform 0.2s ease;
+    }
+
+    .footer-nav-link:hover {
+      color: #ffffff;
+      transform: translateX(4px);
+    }
+
+    .footer-center {
+      grid-column: 3;
+      grid-row: 1;
+      align-self: start;
+      margin-top: 52px;
+      color: var(--text-dim);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .footer-credit {
+      display: block;
+      margin-top: 8px;
+      color: var(--text-dim);
+      font-size: 10px;
+    }
+
     .footer-right {
+      grid-column: 4;
+      grid-row: 1;
+      align-self: start;
       display: flex;
       align-items: center;
       gap: 12px;
+      margin-top: 2px;
+      justify-content: flex-end;
+    }
+
+    .site-footer .social-btn:hover {
+      color: #ffffff;
+      border-color: var(--red-primary);
+      background: rgba(255, 30, 56, 0.16);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 22px rgba(255, 30, 56, 0.24);
+    }
+
+    .site-footer .social-btn svg {
+      transition: transform 0.2s ease;
+    }
+
+    .site-footer .social-btn:hover svg {
+      transform: scale(1.08);
     }
 
     /* Final button tokens override legacy component sizing consistently. */
@@ -1444,9 +1615,48 @@
       }
 
       .site-footer {
-        flex-direction: column;
+        grid-template-columns: 1fr;
+        align-items: center;
         gap: 16px;
+        margin-top: 0;
+        padding: 30px 16px;
         text-align: center;
+      }
+
+      .site-footer::before {
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .footer-left,
+      .footer-nav,
+      .footer-meta {
+        align-items: center;
+      }
+
+      .footer-description,
+      .footer-center {
+        max-width: 300px;
+        text-align: center;
+      }
+
+      .footer-center,
+      .footer-right {
+        grid-column: auto;
+        grid-row: auto;
+        align-self: auto;
+      }
+
+      .footer-center {
+        margin-top: 0;
+      }
+
+      .footer-nav-links {
+        align-items: center;
+      }
+
+      .footer-right {
+        justify-content: center;
       }
     }
 
@@ -1806,8 +2016,8 @@
 
         <div class="coming-soon-floating-wrapper">
           <div class="project-neon-icon">&lt;/&gt;</div>
-          <div class="project-coming-soon">COMING SOON</div>
-          <div class="project-coming-sub">Exciting projects are on the way. Stay tuned!</div>
+          <div class="project-coming-soon">MORE PROJECTS COMING SOON</div>
+          <div class="project-coming-sub">New digital experiences are in progress. Check back soon for the next release.</div>
         </div>
       </div>
     </section>
@@ -1873,17 +2083,31 @@
     <!-- FOOTER -->
     <footer class="site-footer">
       <div class="footer-left">
-        <a href="#home" class="brand-logo" style="font-size: 20px;">
+        <a href="#home" class="brand-logo" style="font-size: 20px;" aria-label="Go to home">
           <span class="logo-d">D</span><span class="logo-v">V</span>
         </a>
         <div class="footer-brand-info">
           <span class="footer-brand-name">Devansh Vishwakarma</span>
-          <span class="footer-brand-role">Web Developer</span>
+          <span class="footer-tagline">Developer • AI Enthusiast • Problem Solver</span>
         </div>
+        <span class="footer-availability">Open to Internship Opportunities</span>
+        <p class="footer-description">Building digital experiences with code, creativity &amp; technology.</p>
       </div>
 
+      <nav class="footer-nav" aria-label="Footer navigation">
+        <span class="footer-column-title">Explore</span>
+        <div class="footer-nav-links">
+          <a href="#home" class="footer-nav-link">Home</a>
+          <a href="#about" class="footer-nav-link">About</a>
+          <a href="#skills" class="footer-nav-link">Skills</a>
+          <a href="#projects" class="footer-nav-link">Projects</a>
+          <a href="#contact" class="footer-nav-link">Contact</a>
+        </div>
+      </nav>
+
       <div class="footer-center">
-        © 2024 Devansh Vishwakarma. All rights reserved.
+        © 2026 Devansh Vishwakarma. All rights reserved.
+        <span class="footer-credit">Designed &amp; Built by Devansh Vishwakarma</span>
       </div>
 
       <div class="footer-right">
