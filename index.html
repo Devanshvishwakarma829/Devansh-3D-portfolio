@@ -107,6 +107,147 @@
       opacity: 0;
     }
 
+    #initialization-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 99998;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      overflow: hidden;
+      background: #030304;
+      transition: opacity 0.8s ease, visibility 0.8s ease;
+    }
+
+    #initialization-screen::before,
+    #initialization-screen::after {
+      content: '';
+      position: absolute;
+      pointer-events: none;
+    }
+
+    #initialization-screen::before {
+      inset: 0;
+      opacity: 0.22;
+      background-image: linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: linear-gradient(to bottom, transparent, #000 25%, #000 75%, transparent);
+    }
+
+    #initialization-screen::after {
+      width: 42vw;
+      height: 42vw;
+      max-width: 560px;
+      max-height: 560px;
+      border: 1px solid rgba(255, 30, 56, 0.18);
+      border-radius: 50%;
+      box-shadow: 0 0 0 24px rgba(255, 30, 56, 0.025), 0 0 90px rgba(255, 30, 56, 0.08);
+      animation: boot-pulse 3.5s ease-in-out infinite;
+    }
+
+    .initialization-content {
+      position: relative;
+      z-index: 1;
+      width: min(520px, 100%);
+      text-align: center;
+      animation: boot-rise 0.9s ease both;
+    }
+
+    .initialization-mark {
+      display: inline-grid;
+      place-items: center;
+      width: 54px;
+      height: 54px;
+      margin-bottom: 34px;
+      border: 1px solid var(--red-primary);
+      color: var(--red-primary);
+      font: 700 18px/1 'Space Grotesk', sans-serif;
+      letter-spacing: 0.08em;
+      box-shadow: 0 0 24px var(--red-glow), inset 0 0 20px var(--red-soft);
+    }
+
+    .initialization-kicker {
+      margin-bottom: 16px;
+      color: var(--text-dim);
+      font: 600 10px/1 'JetBrains Mono', monospace;
+      letter-spacing: 0.34em;
+    }
+
+    .initialization-title {
+      color: var(--text-white);
+      font: 800 clamp(30px, 5vw, 58px)/0.95 'Space Grotesk', sans-serif;
+      letter-spacing: 0.12em;
+      text-indent: 0.12em;
+    }
+
+    .initialization-subtitle {
+      margin-top: 14px;
+      color: var(--text-muted);
+      font: 400 12px/1.5 'JetBrains Mono', monospace;
+      letter-spacing: 0.08em;
+    }
+
+    .initialization-progress-wrap {
+      margin: 58px auto 0;
+      text-align: left;
+    }
+
+    .initialization-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      color: var(--text-dim);
+      font: 600 10px/1 'JetBrains Mono', monospace;
+      letter-spacing: 0.14em;
+    }
+
+    .initialization-meta strong {
+      color: var(--text-white);
+      font-weight: 600;
+    }
+
+    .initialization-progress {
+      height: 2px;
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    #initialization-progress-bar {
+      width: 0%;
+      height: 100%;
+      background: var(--text-white);
+      box-shadow: 0 0 14px var(--red-glow);
+      transition: width 0.2s ease-out;
+    }
+
+    .initialization-status {
+      margin-top: 18px;
+      color: var(--red-primary);
+      font: 500 10px/1 'JetBrains Mono', monospace;
+      letter-spacing: 0.16em;
+    }
+
+    #initialization-screen.is-ready {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    @keyframes boot-rise {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes boot-pulse {
+      0%, 100% { transform: scale(0.96); opacity: 0.7; }
+      50% { transform: scale(1.02); opacity: 1; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #initialization-screen::after,
+      .initialization-content { animation: none; }
+    }
+
     /* Sleek minimal dark scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
@@ -1929,6 +2070,26 @@
   <!-- Top progress line -->
   <div id="loader"></div>
 
+  <div id="initialization-screen" role="status" aria-live="polite">
+    <div class="initialization-content">
+      <div class="initialization-mark" aria-hidden="true">DV</div>
+      <p class="initialization-kicker">DIGITAL PORTFOLIO / 2026</p>
+      <h1 class="initialization-title">DEVANSH<br>VISHWAKARMA</h1>
+      <p class="initialization-subtitle">Crafting digital experiences with code &amp; creativity.</p>
+
+      <div class="initialization-progress-wrap">
+        <div class="initialization-meta">
+          <span id="initialization-label">INITIALIZING PORTFOLIO</span>
+          <strong id="initialization-percent">0%</strong>
+        </div>
+        <div class="initialization-progress" aria-hidden="true">
+          <div id="initialization-progress-bar"></div>
+        </div>
+        <p class="initialization-status" id="initialization-status">LOADING VISUAL SEQUENCE</p>
+      </div>
+    </div>
+  </div>
+
   <!-- Background Video Scroll Canvas -->
   <div id="canvas-container">
     <canvas id="sequence-canvas"></canvas>
@@ -2376,12 +2537,18 @@
       const canvas = document.getElementById('sequence-canvas');
       const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
       const loader = document.getElementById('loader');
+      const initializationScreen = document.getElementById('initialization-screen');
+      const initializationBar = document.getElementById('initialization-progress-bar');
+      const initializationPercent = document.getElementById('initialization-percent');
+      const initializationLabel = document.getElementById('initialization-label');
+      const initializationStatus = document.getElementById('initialization-status');
 
       // Frame images cache & decoding status
       const images = new Array(TOTAL_FRAMES);
       const loaded = new Array(TOTAL_FRAMES).fill(false);
       let loadedCount = 0;
       let lastRenderedIndex = -1;
+      let initializationFinished = false;
 
       // Snappy, buttery physics (Lerp factor 0.12 eliminates lag feeling)
       let targetProgress = 0;
@@ -2466,16 +2633,36 @@
 
         const percent = (loadedCount / TOTAL_FRAMES) * 100;
         loader.style.width = percent + '%';
+        initializationBar.style.width = percent + '%';
+        initializationPercent.textContent = Math.round(percent) + '%';
         if (loadedCount >= TOTAL_FRAMES) {
-          setTimeout(() => {
-            loader.classList.add('done');
-          }, 200);
+          finishInitialization();
         }
 
         // Render first frame immediately
         if (lastRenderedIndex === -1 && idx === 0) {
           renderFrame(0, true);
         }
+      }
+
+      function updateInitializationProgress() {
+        const percent = Math.min(100, (loadedCount / TOTAL_FRAMES) * 100);
+        loader.style.width = percent + '%';
+        initializationBar.style.width = percent + '%';
+        initializationPercent.textContent = Math.round(percent) + '%';
+      }
+
+      function finishInitialization() {
+        if (initializationFinished) return;
+        initializationFinished = true;
+        initializationBar.style.width = '100%';
+        initializationPercent.textContent = '100%';
+        initializationLabel.textContent = 'PORTFOLIO READY';
+        initializationStatus.textContent = 'ENTERING EXPERIENCE';
+        setTimeout(() => {
+          initializationScreen.classList.add('is-ready');
+          loader.classList.add('done');
+        }, 450);
       }
 
       // Preload with sequential batching + async image decoding (avoids single-thread queue freeze)
@@ -2494,7 +2681,8 @@
         img0.onerror = () => {
           loaded[0] = true;
           loadedCount++;
-          loader.style.width = (loadedCount / TOTAL_FRAMES) * 100 + '%';
+          updateInitializationProgress();
+          if (loadedCount >= TOTAL_FRAMES) finishInitialization();
         };
 
         // Controlled concurrency pump: loads sequentially 1..99 with 8 concurrent connections
@@ -2531,7 +2719,8 @@
             img.onerror = () => {
               loaded[idx] = true;
               loadedCount++;
-              loader.style.width = (loadedCount / TOTAL_FRAMES) * 100 + '%';
+              updateInitializationProgress();
+              if (loadedCount >= TOTAL_FRAMES) finishInitialization();
               active--;
               pump();
             };
