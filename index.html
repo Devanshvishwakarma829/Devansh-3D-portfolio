@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Devansh Vishwakarma | BCA Student & Web Developer</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap"
+    rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #000000;
+      --red-primary: #ff1e38;
+      --red-glow: rgba(255, 30, 56, 0.45);
+      --red-soft: rgba(255, 30, 56, 0.12);
+      --red-border: rgba(255, 30, 56, 0.35);
+      --text-white: #ffffff;
+      --text-muted: #c4c4cc;
+      --text-dim: #888894;
+      --glass-card: rgba(8, 8, 12, 0.68);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Fixed: Removed scroll-behavior: smooth to eliminate scroll fighting and stutter */
+    html {
+      scroll-behavior: auto !important;
+      background-color: var(--bg-dark);
+      color: var(--text-white);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      overflow-x: hidden;
+    }
+
+    body {
+      min-height: 100vh;
+      position: relative;
+      background-color: var(--bg-dark);
+    }
+
+    /* GPU-promoted fixed canvas viewport */
+    #canvas-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      background-color: #000000;
+      overflow: hidden;
+      will-change: transform;
+      transform: translateZ(0);
+      backface-visibility: hidden;
+    }
+
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      will-change: transform;
+      transform: translateZ(0);
+    }
+
+    /* Ultra-light vignette so background video is 100% visible */
+    .canvas-vignette {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 50% 35%, transparent 35%, rgba(0, 0, 0, 0.35) 75%, rgba(0, 0, 0, 0.65) 100%);
+      pointer-events: none;
+    }
+
+    /* Subtle loading indicator at the very top edge */
+    #loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      width: 0%;
+      background: linear-gradient(90deg, #ff1e38, #ff4d63, #ff1e38);
+      box-shadow: 0 0 14px var(--red-glow);
+      z-index: 99999;
+      transition: width 0.15s ease-out, opacity 0.5s ease;
+      pointer-events: none;
+    }
+
+    #loader.done {
+      opacity: 0;
+    }
+
+    /* Sleek minimal dark scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #08080a;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #25252b;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--red-primary);
+    }
+
+    /* ---------------- FIXED NAVBAR (CLEAN & FLOATING, NO CARD BOX) ---------------- */
+    .navbar-wrapper {
+      position: fixed;
+      top: 24px;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      padding: 0 40px;
+      pointer-events: none;
+    }
+
+    .hero-navbar {
+      width: 100%;
+      max-width: 1180px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      pointer-events: auto;
+    }
+
+    .brand-logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+    }
+
+    .logo-d {
+      color: #ffffff;
+    }
+
+    .logo-v {
+      color: var(--red-primary);
+      text-shadow: 0 0 12px var(--red-glow);
+    }
+
+    .hero-nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      background: rgba(10, 10, 14, 0.65);
+      padding: 8px 24px;
+      border-radius: 100px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .hero-nav-link {
+      color: #b8b8c4;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: color 0.2s ease, text-shadow 0.2s ease;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+    }
+
+    .hero-nav-link:hover {
+      color: #ffffff;
+      text-shadow: 0 0 8px var(--red-glow);
+    }
+
+    .btn-connect-pill {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: #ffffff;
+      padding: 9px 22px;
+      border-radius: 100px;
+      border: 1px solid var(--red-primary);
+      background: rgba(255, 30, 56, 0.2);
+      transition: all 0.25s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 0 15px rgba(255, 30, 56, 0.2);
+    }
+
+    .btn-connect-pill:hover {
+      background: var(--red-primary);
+      box-shadow: 0 0 20px var(--red-glow);
+      transform: translateY(-1px);
+    }
+
+    /* ---------------- MAIN CONTENT WRAPPER ---------------- */
+    .site-wrapper {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 130px 24px 80px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 140px;
+      will-change: transform;
+      transform: translateZ(0);
+    }
+
+    .content-section {
+      position: relative;
+      width: 100%;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+    }
+
+    /* ---------------- HERO SECTION ---------------- */
+    .hero-section {
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+    }
+
+    .hero-main-content {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      align-items: center;
+      gap: 48px;
+    }
+
+    .hero-left {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .hero-greeting {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--red-primary);
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      text-shadow: 0 0 10px rgba(255, 30, 56, 0.6);
+    }
+
+    .hero-greeting::after {
+      content: '';
+      display: inline-block;
+      width: 42px;
+      height: 2px;
+      background-color: var(--red-primary);
+      box-shadow: 0 0 10px var(--red-primary);
+    }
+
+    .hero-name-primary {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(42px, 5.5vw, 64px);
+      font-weight: 800;
+      line-height: 1.02;
+      letter-spacing: -1px;
+      color: #ffffff;
+      text-shadow: 0 4px 25px rgba(0, 0, 0, 0.95), 0 2px 8px rgba(0, 0, 0, 0.9);
+    }
+
+    .hero-name-secondary {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(42px, 5.5vw, 64px);
+      font-weight: 800;
+      line-height: 1.02;
+      letter-spacing: -1px;
+      color: var(--red-primary);
+      text-shadow: 0 0 28px rgba(255, 30, 56, 0.5), 0 4px 20px rgba(0, 0, 0, 0.95);
+      margin-bottom: 16px;
+    }
+
+    .hero-role {
+      font-size: 13.5px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #ffffff;
+      margin-bottom: 20px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+    }
+
+    .hero-bio {
+      font-size: 14.5px;
+      line-height: 1.7;
+      color: var(--text-muted);
+      max-width: 520px;
+      margin-bottom: 32px;
+      text-shadow: 0 2px 12px rgba(0, 0, 0, 0.95);
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .btn-solid-red {
+      background: var(--red-primary);
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      text-decoration: none;
+      padding: 13px 26px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 20px var(--red-glow);
+    }
+
+    .btn-solid-red:hover {
+      background: #ff334b;
+      box-shadow: 0 6px 28px rgba(255, 30, 56, 0.7);
+      transform: translateY(-2px);
+    }
+
+    .btn-outline-dark {
+      background: rgba(12, 12, 16, 0.75);
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      text-decoration: none;
+      padding: 13px 26px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.25s ease;
+    }
+
+    .btn-outline-dark:hover {
+      border-color: var(--red-primary);
+      background: rgba(255, 30, 56, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .hero-socials {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .social-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      background: rgba(12, 12, 16, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #c4c4cc;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .social-btn svg {
+      width: 17px;
+      height: 17px;
+      fill: currentColor;
+    }
+
+    .social-btn:hover {
+      color: #ffffff;
+      border-color: var(--red-primary);
+      background: rgba(255, 30, 56, 0.2);
+      box-shadow: 0 0 14px var(--red-glow);
+    }
+
+    .hero-right {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .hud-circle-wrapper {
+      position: relative;
+      width: 320px;
+      height: 320px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hud-radar-ring {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 2px dashed rgba(255, 30, 56, 0.6);
+      box-shadow: 0 0 35px rgba(255, 30, 56, 0.35), inset 0 0 30px rgba(255, 30, 56, 0.2);
+      animation: rotateRadar 30s linear infinite;
+      will-change: transform;
+    }
+
+    @keyframes rotateRadar {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .hud-circle-outer {
+      position: absolute;
+      width: 90%;
+      height: 90%;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 30, 56, 0.45);
+    }
+
+    .hud-circle-inner {
+      position: relative;
+      width: 80%;
+      height: 80%;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid var(--red-primary);
+      box-shadow: 0 0 30px var(--red-glow);
+      background: #000000;
+    }
+
+    .hud-circle-inner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: 50% 12%;
+      display: block;
+      filter: contrast(1.05) brightness(1.02);
+    }
+
+    .open-to-work-badge {
+      margin-top: 20px;
+      background: rgba(12, 12, 16, 0.8);
+      border: 1px solid var(--red-border);
+      padding: 7px 18px;
+      border-radius: 100px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 0 16px rgba(255, 30, 56, 0.25);
+    }
+
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      background-color: var(--red-primary);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--red-primary);
+      animation: blink 1.8s infinite;
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.4;
+        transform: scale(0.8);
+      }
+    }
+
+    /* ---------------- ABOUT SECTION (COMPACT DETAIL CARDS ON RIGHT) ---------------- */
+    .about-content-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 56px;
+      align-items: center;
+    }
+
+    .about-left {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .about-subtitle {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--red-primary);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+      text-shadow: 0 0 10px rgba(255, 30, 56, 0.6);
+    }
+
+    .about-subtitle::after {
+      content: '';
+      display: inline-block;
+      width: 32px;
+      height: 2px;
+      background-color: var(--red-primary);
+      box-shadow: 0 0 8px var(--red-primary);
+    }
+
+    .about-heading {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(34px, 4vw, 44px);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+      margin-bottom: 20px;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.95);
+    }
+
+    .about-paragraph {
+      font-size: 14.5px;
+      line-height: 1.75;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+    }
+
+    .about-right-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      align-items: flex-end;
+    }
+
+    .detail-item-compact {
+      width: 100%;
+      max-width: 340px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--glass-card);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 12px 18px;
+      border-radius: 12px;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    .detail-item-compact:hover {
+      border-color: var(--red-border);
+      transform: translateX(-4px);
+    }
+
+    .detail-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: rgba(255, 30, 56, 0.15);
+      border: 1px solid var(--red-border);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--red-primary);
+      flex-shrink: 0;
+    }
+
+    .detail-icon svg {
+      width: 17px;
+      height: 17px;
+      fill: currentColor;
+    }
+
+    .detail-texts {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .detail-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .detail-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #ffffff;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+    }
+
+    /* ---------------- SKILLS SECTION (FLOATING) ---------------- */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .skill-card {
+      background: var(--glass-card);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 24px 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      transition: all 0.25s ease;
+      cursor: default;
+    }
+
+    .skill-card:hover {
+      border-color: var(--red-primary);
+      background: rgba(255, 30, 56, 0.12);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 30, 56, 0.25);
+    }
+
+    .skill-icon-box {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+      font-size: 19px;
+      font-weight: 800;
+    }
+
+    .skill-icon-html {
+      background: #e44d26;
+      color: #ffffff;
+    }
+
+    .skill-icon-css {
+      background: #264de4;
+      color: #ffffff;
+    }
+
+    .skill-icon-js {
+      background: #f7df1e;
+      color: #000000;
+    }
+
+    .skill-icon-py {
+      background: #3776ab;
+      color: #ffffff;
+    }
+
+    .skill-icon-git {
+      background: #f05032;
+      color: #ffffff;
+    }
+
+    .skill-icon-cube {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      border: 1px dashed rgba(255, 255, 255, 0.3);
+    }
+
+    .skill-name {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      color: #ffffff;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+    }
+
+    .skill-role {
+      font-size: 11px;
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+
+    /* ---------------- COMING SOON SECTION (FLOATING) ---------------- */
+    .coming-soon-floating-wrapper {
+      width: 100%;
+      padding: 40px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: transparent;
+      border: none;
+    }
+
+    .project-neon-icon {
+      width: 68px;
+      height: 48px;
+      border: 2px solid var(--red-primary);
+      border-radius: 8px;
+      box-shadow: 0 0 25px var(--red-glow), inset 0 0 15px rgba(255, 30, 56, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Grotesk', monospace;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--red-primary);
+      margin-bottom: 16px;
+      background: rgba(10, 10, 15, 0.6);
+    }
+
+    .project-coming-soon {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(26px, 3.5vw, 36px);
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #ffffff;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.95);
+    }
+
+    .project-coming-sub {
+      font-size: 14px;
+      color: var(--text-muted);
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+    }
+
+    /* ---------------- CONTACT SECTION (COMPACT PILLS) ---------------- */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: center;
+    }
+
+    .contact-left {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+    }
+
+    .contact-heading {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(30px, 3.5vw, 40px);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+      text-transform: uppercase;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.95);
+    }
+
+    .contact-heading .text-red {
+      color: var(--red-primary);
+      text-shadow: 0 0 20px var(--red-glow);
+    }
+
+    .contact-items-compact-row {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .contact-item-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      width: fit-content;
+      min-width: 180px;
+      background: var(--glass-card);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 10px 20px;
+      border-radius: 10px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    .contact-item-pill:hover {
+      border-color: var(--red-primary);
+      background: rgba(255, 30, 56, 0.18);
+      transform: translateX(4px);
+    }
+
+    .contact-item-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: rgba(255, 30, 56, 0.15);
+      border: 1px solid var(--red-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--red-primary);
+      flex-shrink: 0;
+    }
+
+    .contact-item-icon svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    .contact-item-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+    }
+
+    .contact-radar-wrapper {
+      width: 100%;
+      height: 240px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .radar-circle {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 30, 56, 0.35);
+      box-shadow: 0 0 15px rgba(255, 30, 56, 0.15);
+    }
+
+    .radar-c1 {
+      width: 80px;
+      height: 80px;
+    }
+
+    .radar-c2 {
+      width: 140px;
+      height: 140px;
+    }
+
+    .radar-c3 {
+      width: 200px;
+      height: 200px;
+      border-style: dashed;
+    }
+
+    .radar-c4 {
+      width: 260px;
+      height: 260px;
+      border-color: rgba(255, 30, 56, 0.2);
+    }
+
+    .radar-target-line-h {
+      position: absolute;
+      width: 260px;
+      height: 1px;
+      background: rgba(255, 30, 56, 0.25);
+    }
+
+    .radar-target-line-v {
+      position: absolute;
+      height: 260px;
+      width: 1px;
+      background: rgba(255, 30, 56, 0.25);
+    }
+
+    .radar-airplane {
+      position: relative;
+      z-index: 2;
+      color: var(--red-primary);
+      filter: drop-shadow(0 0 16px var(--red-primary));
+      transform: rotate(15deg);
+      animation: floatPlane 3s ease-in-out infinite;
+      will-change: transform;
+    }
+
+    @keyframes floatPlane {
+
+      0%,
+      100% {
+        transform: rotate(15deg) translateY(0);
+      }
+
+      50% {
+        transform: rotate(15deg) translateY(-6px);
+      }
+    }
+
+    /* ---------------- FOOTER ---------------- */
+    .site-footer {
+      padding: 30px 0 40px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .footer-brand-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .footer-brand-name {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #ffffff;
+      text-transform: uppercase;
+    }
+
+    .footer-brand-role {
+      font-size: 10px;
+      color: var(--red-primary);
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .footer-center {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .footer-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .hero-nav-links {
+        display: none;
+      }
+
+      .hero-main-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      .hero-left {
+        align-items: center;
+      }
+
+      .hero-greeting {
+        justify-content: center;
+      }
+
+      .hero-actions {
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .about-content-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .about-right-cards {
+        align-items: center;
+      }
+
+      .skills-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .contact-grid {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      .contact-left {
+        align-items: center;
+      }
+
+      .site-footer {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Top progress line -->
+  <div id="loader"></div>
+
+  <!-- Background Video Scroll Canvas -->
+  <div id="canvas-container">
+    <canvas id="sequence-canvas"></canvas>
+    <div class="canvas-vignette"></div>
+  </div>
+
+  <!-- Fixed Floating Navbar -->
+  <div class="navbar-wrapper">
+    <nav class="hero-navbar">
+      <a href="#home" class="brand-logo">
+        <span class="logo-d">D</span><span class="logo-v">V</span>
+      </a>
+
+      <div class="hero-nav-links">
+        <a href="#home" class="hero-nav-link">HOME</a>
+        <a href="#about" class="hero-nav-link">ABOUT</a>
+        <a href="#skills" class="hero-nav-link">SKILLS</a>
+        <a href="#projects" class="hero-nav-link">PROJECTS</a>
+        <a href="#contact" class="hero-nav-link">CONTACT</a>
+      </div>
+
+      <a href="#contact" class="btn-connect-pill">LET'S CONNECT ↗</a>
+    </nav>
+  </div>
+
+  <!-- Main Content Overlay: Clean, Transparent, Seamless over Scroll Video -->
+  <div class="site-wrapper">
+
+    <!-- HERO SECTION -->
+    <section id="home" class="content-section hero-section">
+      <div class="hero-main-content">
+        <div class="hero-left">
+          <div class="hero-greeting">HELLO, I'M</div>
+          <h1 class="hero-name-primary">DEVANSH</h1>
+          <h1 class="hero-name-secondary">VISHWAKARMA</h1>
+          <div class="hero-role">BCA STUDENT • WEB DEVELOPER</div>
+          <p class="hero-bio">
+            I build modern, responsive and high-performance websites with clean code and great user experience. I love
+            turning ideas into real digital products.
+          </p>
+
+          <div class="hero-actions">
+            <a href="#projects" class="btn-solid-red">VIEW MY WORK ↗</a>
+            <a href="#contact" class="btn-outline-dark">LET'S CONNECT ↗</a>
+          </div>
+
+          <div class="hero-socials">
+            <a href="https://github.com/Devanshvishwakarma829" target="_blank" class="social-btn" title="GitHub">
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z" />
+              </svg>
+            </a>
+            <a href="https://linkedin.com/in/devansh-vishwakarma-644816431" target="_blank" class="social-btn"
+              title="LinkedIn">
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.25c-.9 0-1.63.73-1.63 1.63a1.63 1.63 0 0 0 1.63 1.63 1.63 1.63 0 0 0 1.63-1.63c0-.9-.73-1.63-1.63-1.63z" />
+              </svg>
+            </a>
+            <a href="mailto:devanshvishwakarma988@gmail.com" class="social-btn" title="Email">
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="hero-right">
+          <div class="hud-circle-wrapper">
+            <div class="hud-radar-ring"></div>
+            <div class="hud-circle-outer"></div>
+            <div class="hud-circle-inner">
+              <img src="./profile.jpg" alt="Devansh Vishwakarma">
+            </div>
+          </div>
+          <div class="open-to-work-badge">
+            <span class="pulse-dot"></span>
+            <span>OPEN TO WORK</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT ME -->
+    <section id="about" class="content-section">
+      <div class="about-content-grid">
+        <div class="about-left">
+          <div class="about-subtitle">ABOUT ME</div>
+          <h2 class="about-heading">WHO I AM</h2>
+
+          <p class="about-paragraph">
+            I'm Devansh Vishwakarma, a BCA student and aspiring Web Developer who enjoys building modern and
+            user-friendly websites.
+          </p>
+          <p class="about-paragraph">
+            I like turning ideas into clean interfaces and interactive digital experiences. I'm currently learning and
+            improving my skills through projects, practice and real-world experience.
+          </p>
+        </div>
+
+        <div class="about-right-cards">
+          <div class="detail-item-compact">
+            <div class="detail-icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z" />
+              </svg>
+            </div>
+            <div class="detail-texts">
+              <span class="detail-label">Education</span>
+              <span class="detail-value">BCA Student</span>
+            </div>
+          </div>
+
+          <div class="detail-item-compact">
+            <div class="detail-icon">
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M12 3L2 12h3v8h14v-8h3L12 3zm0 4.5c1.38 0 2.5 1.12 2.5 2.5s-1.12 2.5-2.5 2.5S9.5 11.38 9.5 10s1.12-2.5 2.5-2.5z" />
+              </svg>
+            </div>
+            <div class="detail-texts">
+              <span class="detail-label">College</span>
+              <span class="detail-value">Sacred Heart Degree College</span>
+            </div>
+          </div>
+
+          <div class="detail-item-compact">
+            <div class="detail-icon">
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+              </svg>
+            </div>
+            <div class="detail-texts">
+              <span class="detail-label">Location</span>
+              <span class="detail-value">Sitapur, Uttar Pradesh</span>
+            </div>
+          </div>
+
+          <div class="detail-item-compact">
+            <div class="detail-icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M7 2v11h3v9l7-12h-4l4-8z" />
+              </svg>
+            </div>
+            <div class="detail-texts">
+              <span class="detail-label">Status</span>
+              <span class="detail-value">Learning &amp; Building</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SKILLS -->
+    <section id="skills" class="content-section">
+      <div class="skills-grid">
+        <div class="skill-card">
+          <div class="skill-icon-box skill-icon-html">5</div>
+          <div class="skill-name">HTML</div>
+          <div class="skill-role">Markup Language</div>
+        </div>
+
+        <div class="skill-card">
+          <div class="skill-icon-box skill-icon-css">3</div>
+          <div class="skill-name">CSS</div>
+          <div class="skill-role">Styling &amp; Layout</div>
+        </div>
+
+        <div class="skill-card">
+          <div class="skill-icon-box skill-icon-js">JS</div>
+          <div class="skill-name">JAVASCRIPT</div>
+          <div class="skill-role">Interactivity</div>
+        </div>
+
+        <div class="skill-card">
+          <div class="skill-icon-box skill-icon-py">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+              <path
+                d="M12 2c-3.3 0-5 1.5-5 3.5V7h5v1H5c-2 0-3.5 1.5-3.5 4.5S3 17 5 17h2v-1.5c0-1.9 1.6-3.5 3.5-3.5h5V10c0-2-1.7-3.5-3.5-3.5zm-2 2a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm4 18c3.3 0 5-1.5 5-3.5V17h-5v-1h7c2 0 3.5-1.5 3.5-4.5S21 7 19 7h-2v1.5c0 1.9-1.6 3.5-3.5 3.5h-5V14c0 2 1.7 3.5 3.5 3.5zm2-2a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+            </svg>
+          </div>
+          <div class="skill-name">PYTHON</div>
+          <div class="skill-role">Programming</div>
+        </div>
+
+        <div class="skill-card">
+          <div class="skill-icon-box skill-icon-git">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+              <path
+                d="M18.8 10.7l-5.5-5.5a1.5 1.5 0 0 0-2.1 0L9.8 6.6l2.3 2.3a1.5 1.5 0 0 1 1.9 1.9l2.2 2.2a1.5 1.5 0 0 1 1.9 1.9l.7-.7a1.5 1.5 0 0 0 0-2.1l-.7-.7a1.5 1.5 0 0 1 0-2.1l.7-.7zM6.6 9.8l1.4-1.4L5.7 6.1a1.5 1.5 0 0 0-2.1 0l-.7.7a1.5 1.5 0 0 0 0 2.1l8.5 8.5a1.5 1.5 0 0 0 2.1 0l.7-.7a1.5 1.5 0 0 0 0-2.1l-2.3-2.3a1.5 1.5 0 0 1-1.9-1.9L8.6 9.1a1.5 1.5 0 0 1-2 .7z" />
+            </svg>
+          </div>
+          <div class="skill-name">GIT &amp; GITHUB</div>
+          <div class="skill-role">Version Control</div>
+        </div>
+
+        <div class="skill-card">
+          <div class="skill-icon-box skill-icon-cube">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path
+                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+              <line x1="12" y1="22.08" x2="12" y2="12" />
+            </svg>
+          </div>
+          <div class="skill-name">MORE SKILLS</div>
+          <div class="skill-role">Coming Soon</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROJECTS / COMING SOON -->
+    <section id="projects" class="content-section">
+      <div class="coming-soon-floating-wrapper">
+        <div class="project-neon-icon">&lt;/&gt;</div>
+        <div class="project-coming-soon">COMING SOON</div>
+        <div class="project-coming-sub">Exciting projects are on the way. Stay tuned!</div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" class="content-section">
+      <div class="contact-grid">
+        <div class="contact-left">
+          <h2 class="contact-heading">LET'S <span class="text-red">CONNECT</span></h2>
+
+          <div class="contact-items-compact-row">
+            <a href="mailto:devanshvishwakarma988@gmail.com" class="contact-item-pill">
+              <div class="contact-item-icon">
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                </svg>
+              </div>
+              <span class="contact-item-label">EMAIL</span>
+            </a>
+
+            <a href="https://linkedin.com/in/devansh-vishwakarma-644816431" target="_blank" class="contact-item-pill">
+              <div class="contact-item-icon">
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.25c-.9 0-1.63.73-1.63 1.63a1.63 1.63 0 0 0 1.63 1.63 1.63 1.63 0 0 0 1.63-1.63c0-.9-.73-1.63-1.63-1.63z" />
+                </svg>
+              </div>
+              <span class="contact-item-label">LINKEDIN</span>
+            </a>
+
+            <a href="https://github.com/Devanshvishwakarma829" target="_blank" class="contact-item-pill">
+              <div class="contact-item-icon">
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z" />
+                </svg>
+              </div>
+              <span class="contact-item-label">GITHUB</span>
+            </a>
+          </div>
+
+          <a href="mailto:devanshvishwakarma988@gmail.com" class="btn-solid-red" style="margin-top: 10px;">LET'S CONNECT
+            ↗</a>
+        </div>
+
+        <div class="contact-radar-wrapper">
+          <div class="radar-target-line-h"></div>
+          <div class="radar-target-line-v"></div>
+          <div class="radar-circle radar-c1"></div>
+          <div class="radar-circle radar-c2"></div>
+          <div class="radar-circle radar-c3"></div>
+          <div class="radar-circle radar-c4"></div>
+          <div class="radar-airplane">
+            <svg viewBox="0 0 24 24" width="46" height="46" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+      <div class="footer-left">
+        <a href="#home" class="brand-logo" style="font-size: 20px;">
+          <span class="logo-d">D</span><span class="logo-v">V</span>
+        </a>
+        <div class="footer-brand-info">
+          <span class="footer-brand-name">Devansh Vishwakarma</span>
+          <span class="footer-brand-role">Web Developer</span>
+        </div>
+      </div>
+
+      <div class="footer-center">
+        © 2024 Devansh Vishwakarma. All rights reserved.
+      </div>
+
+      <div class="footer-right">
+        <a href="https://github.com/Devanshvishwakarma829" target="_blank" class="social-btn" title="GitHub">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z" />
+          </svg>
+        </a>
+        <a href="https://linkedin.com/in/devansh-vishwakarma-644816431" target="_blank" class="social-btn"
+          title="LinkedIn">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.25c-.9 0-1.63.73-1.63 1.63a1.63 1.63 0 0 0 1.63 1.63 1.63 1.63 0 0 0 1.63-1.63c0-.9-.73-1.63-1.63-1.63z" />
+          </svg>
+        </a>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ULTRA-PERFORMANCE SMOOTH SCROLL & PRE-DECODED CANVAS ENGINE -->
+  <script>
+    (function () {
+      'use strict';
+
+      const TOTAL_FRAMES = 100;
+      const canvas = document.getElementById('sequence-canvas');
+      const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
+      const loader = document.getElementById('loader');
+
+      // Frame images cache & decoding status
+      const images = new Array(TOTAL_FRAMES);
+      const loaded = new Array(TOTAL_FRAMES).fill(false);
+      let loadedCount = 0;
+      let lastRenderedIndex = -1;
+
+      // Snappy, buttery physics (Lerp factor 0.12 eliminates lag feeling)
+      let targetProgress = 0;
+      let currentProgress = 0;
+      const LERP_FACTOR = 0.12;
+
+      // Precalculated cover bounds to eliminate math on every RAF tick
+      const coverBounds = { ox: 0, oy: 0, nw: 0, nh: 0 };
+      const IMAGE_WIDTH = 1280;
+      const IMAGE_HEIGHT = 720;
+
+      function getFramePath(index) {
+        const paddedIndex = String(index).padStart(3, '0');
+        return `./Man_turning_head_with_sunglasses_202609030734_${paddedIndex}.jpg`;
+      }
+
+      function updateCoverBounds() {
+        const cw = canvas.width;
+        const ch = canvas.height;
+        const scale = Math.max(cw / IMAGE_WIDTH, ch / IMAGE_HEIGHT);
+        coverBounds.nw = IMAGE_WIDTH * scale;
+        coverBounds.nh = IMAGE_HEIGHT * scale;
+        coverBounds.ox = (cw - coverBounds.nw) * 0.5;
+        coverBounds.oy = (ch - coverBounds.nh) * 0.5;
+      }
+
+      function resizeCanvas() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const cssWidth = window.innerWidth;
+        const cssHeight = window.innerHeight;
+
+        canvas.width = cssWidth * dpr;
+        canvas.height = cssHeight * dpr;
+
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'medium';
+
+        updateCoverBounds();
+
+        if (lastRenderedIndex >= 0) {
+          renderFrame(lastRenderedIndex, true);
+        }
+      }
+
+      // Blit pre-decoded image directly to canvas
+      function drawFrame(img) {
+        ctx.drawImage(img, coverBounds.ox, coverBounds.oy, coverBounds.nw, coverBounds.nh);
+      }
+
+      // Fast nearest-frame lookup with early break
+      function getUsableFrame(targetIndex) {
+        if (loaded[targetIndex] && images[targetIndex]) {
+          return { frame: images[targetIndex], index: targetIndex };
+        }
+        for (let dist = 1; dist < TOTAL_FRAMES; dist++) {
+          const down = targetIndex - dist;
+          if (down >= 0 && loaded[down] && images[down]) {
+            return { frame: images[down], index: down };
+          }
+          const up = targetIndex + dist;
+          if (up < TOTAL_FRAMES && loaded[up] && images[up]) {
+            return { frame: images[up], index: up };
+          }
+        }
+        return null;
+      }
+
+      function renderFrame(index, force = false) {
+        if (index === lastRenderedIndex && !force) return;
+
+        const result = getUsableFrame(index);
+        if (result && result.frame) {
+          drawFrame(result.frame);
+          lastRenderedIndex = result.index;
+        }
+      }
+
+      function onFrameLoaded(idx, img) {
+        loaded[idx] = true;
+        images[idx] = img;
+        loadedCount++;
+
+        const percent = (loadedCount / TOTAL_FRAMES) * 100;
+        loader.style.width = percent + '%';
+        if (loadedCount >= TOTAL_FRAMES) {
+          setTimeout(() => {
+            loader.classList.add('done');
+          }, 200);
+        }
+
+        // Render first frame immediately
+        if (lastRenderedIndex === -1 && idx === 0) {
+          renderFrame(0, true);
+        }
+      }
+
+      // Preload with sequential batching + async image decoding (avoids single-thread queue freeze)
+      function preloadImages() {
+        // Frame 0 priority
+        const img0 = new Image();
+        img0.src = getFramePath(0);
+        const decode0 = () => {
+          if (img0.decode) {
+            img0.decode().then(() => onFrameLoaded(0, img0)).catch(() => onFrameLoaded(0, img0));
+          } else {
+            onFrameLoaded(0, img0);
+          }
+        };
+        img0.onload = decode0;
+
+        // Controlled concurrency pump: loads sequentially 1..99 with 8 concurrent connections
+        const CONCURRENCY = 8;
+        let active = 0;
+        let nextIndex = 1;
+
+        function pump() {
+          while (active < CONCURRENCY && nextIndex < TOTAL_FRAMES) {
+            const idx = nextIndex++;
+            active++;
+            const img = new Image();
+            img.src = getFramePath(idx);
+
+            const handleComplete = () => {
+              if (img.decode) {
+                img.decode().then(() => {
+                  onFrameLoaded(idx, img);
+                  active--;
+                  pump();
+                }).catch(() => {
+                  onFrameLoaded(idx, img);
+                  active--;
+                  pump();
+                });
+              } else {
+                onFrameLoaded(idx, img);
+                active--;
+                pump();
+              }
+            };
+
+            img.onload = handleComplete;
+            img.onerror = () => {
+              active--;
+              pump();
+            };
+          }
+        }
+
+        pump();
+      }
+
+      // Fast passive scroll listener
+      function updateScrollProgress() {
+        const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+        if (scrollable > 0) {
+          targetProgress = Math.max(0, Math.min(1, window.scrollY / scrollable));
+        } else {
+          targetProgress = 0;
+        }
+      }
+
+      window.addEventListener('scroll', updateScrollProgress, { passive: true });
+      window.addEventListener('resize', resizeCanvas, { passive: true });
+
+      // Continuous RAF render loop with smooth dampening (no idle redraws)
+      function tick() {
+        const delta = targetProgress - currentProgress;
+        if (Math.abs(delta) > 0.0001) {
+          currentProgress += delta * LERP_FACTOR;
+          const frameIndex = Math.min(
+            TOTAL_FRAMES - 1,
+            Math.max(0, Math.round(currentProgress * (TOTAL_FRAMES - 1)))
+          );
+          renderFrame(frameIndex);
+        } else if (currentProgress !== targetProgress) {
+          currentProgress = targetProgress;
+          const frameIndex = Math.min(
+            TOTAL_FRAMES - 1,
+            Math.max(0, Math.round(currentProgress * (TOTAL_FRAMES - 1)))
+          );
+          renderFrame(frameIndex);
+        }
+
+        requestAnimationFrame(tick);
+      }
+
+      // Boot
+      resizeCanvas();
+      preloadImages();
+      updateScrollProgress();
+      requestAnimationFrame(tick);
+    })();
+  </script>
+</body>
+
+</html>
